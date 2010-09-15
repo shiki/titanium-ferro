@@ -2,6 +2,19 @@
 Ferro = {
 
   _namespaceRoot: null,
+  _includeRootPath: null,
+
+  createObj: function(base, props) {
+    function i() {};
+    i.prototype = base;
+
+    var instance = new i();
+    if (typeof props != 'undefined') {
+      for (var j in props)
+        instance[j] = props[j];
+    }
+    return instance;
+  },
 
   setNSRoot: function(obj) {
     this._namespaceRoot = obj;
@@ -24,16 +37,23 @@ Ferro = {
     }
   },
 
-  createObj: function(base, props) {
-    function i() {};
-    i.prototype = base;
+  setIncludeRootPath: function(path) {
+    this._includeRootPath = path;
+    return this;
+  },
 
-    var instance = new i();
-    if (typeof props != 'undefined') {
-      for (j in props)
-        instance[j] = props[j];
-    }
-    return instance;
+  include: function(filePath) {
+    Ti.include(this._includeRootPath + filePath);
+    return this;
+  },
+
+  /**
+   * http://stackoverflow.com/questions/929776/merging-associative-arrays-javascript/929791#929791
+   */
+  extend: function(destination, source) {
+    for (var property in source)
+      destination[property] = source[property];
+    return destination;
   },
 
   /**
@@ -67,7 +87,7 @@ Ferro = {
   truncate: function(text, length, ellipsis) {
     if (!text)
       return '';
-    
+
     // Set length and ellipsis to defaults if not defined
     if (typeof length == 'undefined') length = 100;
     if (typeof ellipsis == 'undefined') ellipsis = '...';
@@ -130,9 +150,13 @@ Ferro.UI = {
     return control.top + control.height;
   },
 
+  rightOf: function(control) {
+    return control.left + control.width;
+  },
+
   createAlertOK: function(options) {
-    options = _.extend({title: '', message: ''}, options);
-    options = _.extend(options, {buttonNames: ['OK']});
+    options = Fe.extend({title: '', message: ''}, options);
+    options = Fe.extend(options, {buttonNames: ['OK']});
     var dialog = Ti.UI.createAlertDialog(options);
     dialog.addEventListener('click', function(e) {
       dialog.hide();
@@ -141,7 +165,7 @@ Ferro.UI = {
   },
 
   createAlertDialog: function(options) {
-    options = _.extend({
+    options = Fe.extend({
       title: '',
       message: '',
       buttonNames: ['OK'],
