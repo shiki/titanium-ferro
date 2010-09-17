@@ -16,7 +16,7 @@ Ferro = {
     return instance;
   },
 
-  setNSRoot: function(obj) {
+  setRegisterNSRoot: function(obj) {
     this._namespaceRoot = obj;
   },
 
