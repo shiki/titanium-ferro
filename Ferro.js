@@ -154,19 +154,9 @@ Ferro.UI = {
     return control.left + control.width;
   },
 
-  createAlertOK: function(options) {
-    options = Fe.extend({title: '', message: ''}, options);
-    options = Fe.extend(options, {buttonNames: ['OK']});
-    var dialog = Ti.UI.createAlertDialog(options);
-    dialog.addEventListener('click', function(e) {
-      dialog.hide();
-    });
-    return dialog;
-  },
-
   createAlertDialog: function(options) {
     options = Fe.extend({
-      title: '',
+      //title: '',
       message: '',
       buttonNames: ['OK'],
       onClick: null
