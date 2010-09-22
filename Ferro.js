@@ -1,4 +1,7 @@
 
+/**
+ * Singleton
+ */
 Ferro = {
 
   _namespaceRoot: null,
@@ -109,7 +112,9 @@ Ferro = {
 };
 
 
-
+/**
+ * Singleton
+ */
 Ferro.UI = {
 
   /**
@@ -167,6 +172,60 @@ Ferro.UI = {
     return dialog;
   }
 };
+
+/**
+ * Meant to be used as a single request for the current location. This
+ * will be useful in instances where you initiate a request while doing something
+ * else. You can then attach a callback later which will be fired: immediately
+ * if the request was already finished; or when the request is finished.
+ */
+Ferro.GeoLocationRequest = {
+
+  NOT_STARTED: 0,
+  STARTED: 1,
+  FINISHED: 2,
+
+  _eventName: '',
+  status: 0,
+  resultEvent: null,
+
+  start: function(callback) {
+    if (this.status != this.NOT_STARTED)
+      return this;
+
+    if (typeof callback == 'function')
+      this.attachCallback(callback);
+    
+    var c = this;
+    this.status = this.STARTED;
+
+    Titanium.Geolocation.getCurrentPosition(function(e) {
+      c.resultEvent = e;
+
+      Ti.App.fireEvent(c.getEventName(), e);
+      c.status = c.FINISHED;
+    });
+
+    return this;
+  },
+
+  getEventName: function() {
+    if (this._eventName.length == 0)
+      this._eventName = 'Ferro.GeoLocationRequest.FINISHED.' + Math.random();
+    return this._eventName;
+  },
+
+  attachCallback: function(callback) {    
+    if (this.status == this.FINISHED) {
+      callback(this.resultEvent);
+      return this;
+    }
+
+    Ti.App.addEventListener(this.getEventName(), callback);
+    return this;
+  }
+};
+
 
 /**
  * Shortcut for the lazy
