@@ -221,17 +221,25 @@ Ferro.GeoLocationRequest = {
       return this;
     }
 
+    Titanium.Geolocation.purpose = this._purpose;
+    Titanium.Geolocation.getCurrentPosition(function(e) {          
+      c.resultEvent = e; // replace eventdata if time out already occured      
+      if (c.status != c.FINISHED) {
+        c.status = c.FINISHED;
+        Ti.App.fireEvent(c.getEventName(), c.resultEvent);
+      }
+    });
+
     if (this._timeout) {
-      setTimeout(function() {
-        if (c.status == c.FINISHED)
+      setTimeout(function() {        
+        if (c.status == c.FINISHED) // don't replace eventdata if time out occured after getCurrentPosition
           return;
         c.timedOut = true;
-        c._finishRequest({error: 'Request timed out.'});
+        c.status = c.FINISHED;
+        c.resultEvent = {error: 'Request timed out.'};
+        Ti.App.fireEvent(c.getEventName(), c.resultEvent);
       }, this._timeout);
     }
-
-    Titanium.Geolocation.purpose = this._purpose;
-    Titanium.Geolocation.getCurrentPosition(this._finishRequest);
 
     return this;
   },
@@ -250,17 +258,6 @@ Ferro.GeoLocationRequest = {
 
     Ti.App.addEventListener(this.getEventName(), callback);
     return this;
-  },
-
-  _finishRequest: function(receivedEvent) {
-    alert('got finish request');
-    alert(JSON.stringify(receivedEvent));
-    if (this.status == this.FINISHED)
-      return;
-
-    this.status = this.FINISHED;
-    this.resultEvent = typeof receivedEvent == 'undefined' ? null: receivedEvent;
-    Ti.App.fireEvent(this.getEventName(), this.resultEvent);
   }
 };
 
