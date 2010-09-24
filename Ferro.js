@@ -185,26 +185,53 @@ Ferro.GeoLocationRequest = {
   STARTED: 1,
   FINISHED: 2,
 
+  timedOut: false,
+
   _eventName: '',
+  _purpose: '',
+  _timeout: null,
+
   status: 0,
   resultEvent: null,
 
+  setTimeout: function(ms) {
+    this._timeout = ms;
+    return this;
+  },
+
+  setPurpose: function(purpose) {
+    this._purpose = purpose;
+    return this;
+  },
+
   start: function(callback) {
+    if (typeof callback == 'function')
+      this.attachCallback(callback);
+
     if (this.status != this.NOT_STARTED)
       return this;
 
-    if (typeof callback == 'function')
-      this.attachCallback(callback);
-    
     var c = this;
+    this.timedOut = false;
     this.status = this.STARTED;
 
-    Titanium.Geolocation.getCurrentPosition(function(e) {
-      c.resultEvent = e;
-
-      Ti.App.fireEvent(c.getEventName(), e);
+    if (!Ti.Geolocation.locationServicesEnabled) {
       c.status = c.FINISHED;
-    });
+      Ti.App.fireEvent(c.getEventName(), null);
+      return this;
+    }
+
+    if (this._timeout) {
+      setTimeout(function() {
+        if (c.status == c.FINISHED)
+          return;
+        c.timedOut = true;
+        c._finishRequest({error: 'Request timed out.'});
+      }, this._timeout);
+    }
+
+    Titanium.Geolocation.purpose = this._purpose;
+    Titanium.Geolocation.getCurrentPosition(this._finishRequest);
 
     return this;
   },
@@ -215,7 +242,7 @@ Ferro.GeoLocationRequest = {
     return this._eventName;
   },
 
-  attachCallback: function(callback) {    
+  attachCallback: function(callback) {
     if (this.status == this.FINISHED) {
       callback(this.resultEvent);
       return this;
@@ -223,6 +250,17 @@ Ferro.GeoLocationRequest = {
 
     Ti.App.addEventListener(this.getEventName(), callback);
     return this;
+  },
+
+  _finishRequest: function(receivedEvent) {
+    alert('got finish request');
+    alert(JSON.stringify(receivedEvent));
+    if (this.status == this.FINISHED)
+      return;
+
+    this.status = this.FINISHED;
+    this.resultEvent = typeof receivedEvent == 'undefined' ? null: receivedEvent;
+    Ti.App.fireEvent(this.getEventName(), this.resultEvent);
   }
 };
 
