@@ -7,6 +7,8 @@ Ferro = {
   _namespaceRoot: null,
   _includeRootPath: null,
 
+  _requiredFiles: [],
+
   createObj: function(base, props) {
     function i() {};
     i.prototype = base;
@@ -45,8 +47,16 @@ Ferro = {
     return this;
   },
 
+  require: function(filePath) {
+    if (typeof this._requiredFiles[filePath] != 'undefined')
+      return this;
+    
+    return this.include(filePath);
+  },
+
   include: function(filePath) {
     Ti.include(this._includeRootPath + filePath);
+    this._requiredFiles[filePath] = true;
     return this;
   },
 
