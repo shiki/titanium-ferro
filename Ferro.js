@@ -149,6 +149,15 @@ Ferro.UI = {
   },
 
   /**
+   * @static
+   */
+  middlePos: function(height, spaceHeight) {
+    if (typeof spaceHeight == 'undefined')
+      spaceHeight = this.screenHeight();
+    return spaceHeight/2 - height/2;
+  },
+
+  /**
    * Return screenWidth * pct
    * @param pct Number This should be in decimal form.
    * @static
