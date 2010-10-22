@@ -26,7 +26,7 @@ Ferro = {
   },
 
   /**
-   * http://weblogs.asp.net/mschwarz/archive/2005/08/26/423699.aspx
+   * @source http://weblogs.asp.net/mschwarz/archive/2005/08/26/423699.aspx
    * Sample:
    *   Utils.setRegisterNSRoot(App).registerNS('UI.Login') creates the namespace: Piclyf.UI.Login
    * @param {String} ns
@@ -61,7 +61,7 @@ Ferro = {
   },
 
   /**
-   * http://stackoverflow.com/questions/929776/merging-associative-arrays-javascript/929791#929791
+   * @source http://stackoverflow.com/questions/929776/merging-associative-arrays-javascript/929791#929791
    */
   extend: function(destination, source) {
     for (var property in source)
@@ -80,6 +80,32 @@ Ferro = {
     else
       res = Ti.Filesystem.resourcesDirectory + path;
     return res;
+  },
+
+  /**
+   * @reference http://developer.appcelerator.com/question/64491/please-post-working-code-for-android-image-resize
+   */
+  resizeImage: function(media, options) {
+    if (typeof options == 'undefined')
+      return media;
+    if (typeof options.width == 'undefined' && typeof options.height == 'undefined')
+      return media;
+
+    var width  = (typeof options.width != 'undefined') ? options.width : null;
+    var height = (typeof options.height != 'undefined') ? options.height : null;
+
+    if (height == null) {
+      height = Math.ceil(media.height * width / media.width);
+    } else if (width == null) {
+      width = Math.ceil(media.width * height / media.height);
+    } 
+
+    var imageView = Ti.UI.createImageView({
+      width:  width,
+      height: height,
+      image:  media
+    });
+    return imageView.toImage();
   },
 
   isIPhone: function() {
